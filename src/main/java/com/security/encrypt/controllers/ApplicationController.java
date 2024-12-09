@@ -5,16 +5,21 @@ import com.security.encrypt.services.encryptService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.KeyPair;
+import java.security.PublicKey;
+
 @RestController
 @RequestMapping("/encrypt-server")
 public class ApplicationController {
 
-    @Autowired
-    private encryptRepository service  ;
 
-    @GetMapping("/get-public-key")
-    public  String generateANewPublicKey(){
-        return this.service.getPublicRSAKey();
+
+    @Autowired
+    private encryptService eService;
+
+    @GetMapping("/getKeys")
+    public String generateANewPublicKey(){
+        return this.eService.getPublicKey();
     }
 
     @PostMapping("/send-message")

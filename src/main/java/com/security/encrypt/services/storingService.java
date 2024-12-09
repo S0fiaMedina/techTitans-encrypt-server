@@ -1,5 +1,7 @@
 package com.security.encrypt.services;
 
+import org.springframework.stereotype.Service;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.file.Files;
@@ -9,6 +11,7 @@ import java.security.PublicKey;
 import java.security.spec.EncodedKeySpec;
 import java.security.spec.X509EncodedKeySpec;
 
+@Service
 public class storingService implements  storingRepository{
 
 

@@ -1,87 +1,43 @@
 package com.security.encrypt.services;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
-import javax.crypto.Cipher;
-import java.nio.charset.StandardCharsets;
-import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.PrivateKey;
-import java.security.PublicKey;
+import java.security.*;
 import java.util.Base64;
+import java.util.concurrent.ExecutionException;
 
-public class encryptService implements  encryptRepository{
+@Service
+public class encryptService{
 
     @Autowired
     storingRepository storeService;
     PrivateKey privateKey;
     PublicKey publicKey;
 
-    @Override
-    public String getPublicRSAKey() {
+    @PostConstruct
+    public void getNewKeys(){
         try {
-            // generación de las llaves
-            KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
-            generator.initialize(2048);
-            KeyPair pair = generator.generateKeyPair();
-
-            // obtención de las llaves
-            this.privateKey = pair.getPrivate();
-            this.publicKey = pair.getPublic();
-
-            // guardado de las llaves
-            this.storeService.storeKey(publicKey, "../keys/public.key");
-
-            return "";
-        } catch (Exception e){
-            System.out.println("Error");
+            this.generateKeys();
         }
-
-    }
-
-    @Override
-    public String encryptMessage(String secretMessage) {
-        String encodedMessage = "";
-        try {
-            // Se configura el encriptador con la llave publica
-            Cipher cipherEncrypt = Cipher.getInstance("RSA");
-            cipherEncrypt.init(Cipher.ENCRYPT_MODE, this.publicKey);
-
-            // se pone en bytes para encriptar
-            byte[] seccretMessageInBytes = secretMessage.getBytes(StandardCharsets.UTF_8);
-            byte[] encryptedMessageInBytes = cipherEncrypt.doFinal(seccretMessageInBytes);
-
-            // Se pone en base 64, asi se trabaja más facil
-            encodedMessage = Base64.getEncoder().encodeToString(encryptedMessageInBytes);
-        } catch (Exception e ){
-
+        catch (NoSuchAlgorithmException e){
+            System.out.println("ERROR");
         }
-        return encodedMessage;
     }
 
-    public String decryptMessage(String ecodedMessage){
-        String decryptedMessage = "";
-        try {
-            byte[] encodedMessageInBytes = ecodedMessage.getBytes();
-
-            // configurar el descrifrador
-            Cipher decryptCipher = Cipher.getInstance("RSA");
-            decryptCipher.init(Cipher.DECRYPT_MODE, this.privateKey);
-
-            // descifrar e mensaje
-            byte[] decryptedMessageInBytes = decryptCipher.doFinal(encodedMessageInBytes);
-            decryptedMessage = new String(decryptedMessageInBytes, StandardCharsets.UTF_8);
-
-        } catch (Exception e){
-
-        }
-        return decryptedMessage;
+    private void generateKeys() throws NoSuchAlgorithmException {
+        KeyPairGenerator generator = KeyPairGenerator.getInstance("RSA");
+        generator.initialize(2048);
+        KeyPair pair =  generator.generateKeyPair();
+        this.privateKey = pair.getPrivate();
+        this.publicKey = pair.getPublic();
     }
 
-    @Override
-    public boolean verifyRSAKey() {
-        return false;
+
+    public String getPublicKey(){
+        return Base64.getEncoder().encodeToString(publicKey.getEncoded());
     }
+
+
 }
